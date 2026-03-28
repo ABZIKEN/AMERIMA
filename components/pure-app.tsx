@@ -406,7 +406,7 @@ function DietEntryScreen({
   onContinue: () => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accentDeep">
           First step
@@ -488,7 +488,7 @@ function MainDashboard({
   onOpenDiet: (dietId: string) => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="p-4">
         <div className="mb-3 flex items-center gap-3">
           <div className="rounded-full bg-tint p-2 text-accentDeep">
@@ -560,7 +560,7 @@ function DietExploreScreen({
   onOpenDiet: (dietId: string) => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       {diets.map((diet) => (
         <Card key={diet.id} className="p-4">
@@ -590,7 +590,7 @@ function DietDetailScreen({
   if (!diet) return null;
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <Card className="space-y-3 p-4">
         <h3 className="text-2xl font-semibold text-ink">{diet.name}</h3>
@@ -632,7 +632,7 @@ function DietQuizScreen({
   onUseRecommendation: (dietId: string) => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <Card className="p-4">
         <h3 className="text-xl font-semibold text-ink">
@@ -680,7 +680,7 @@ function DietQuizScreen({
 
 function RecipesScreen({ onBack }: { onBack: () => void }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <Card className="space-y-3 p-4">
         <h3 className="text-xl font-semibold text-ink">PURE recipes</h3>
@@ -694,7 +694,7 @@ function RecipesScreen({ onBack }: { onBack: () => void }) {
 
 function DatabaseScreen({ onBack }: { onBack: () => void }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <Card className="space-y-3 p-4">
         <h3 className="text-xl font-semibold text-ink">PURE database</h3>
@@ -744,7 +744,7 @@ function ScanScreen({
   onBack: () => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <Card className="overflow-hidden p-4">
         <div className="mb-4 flex flex-wrap gap-2">
@@ -917,7 +917,7 @@ function ChatScreen({
   onSelectReply: (reply: string) => void;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="p-4">
         <h3 className="mb-3 text-xl font-semibold text-ink">AI Agent</h3>
         <div className="space-y-3">
@@ -984,7 +984,7 @@ function LibraryScreen({
   }>;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
       <div className="flex gap-2">
         {(["History", "Saved", "Certified"] as const).map((tab) => (
@@ -1029,7 +1029,7 @@ function ProfileScreen({
   preferences: PreferenceState;
 }) {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="space-y-3 p-4">
         <div className="text-sm font-semibold text-ink">Selected diets</div>
         {selectedDiets.map((diet) => (
@@ -1055,7 +1055,7 @@ function ProfileScreen({
 
 function SettingsScreen() {
   return (
-    <div className="space-y-4 pb-4">
+    <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="space-y-3 p-4">
         <h3 className="text-xl font-semibold text-ink">Settings</h3>
         <div className="rounded-2xl bg-[#f4f8ff] px-3 py-3 text-sm text-muted ring-1 ring-line/70">

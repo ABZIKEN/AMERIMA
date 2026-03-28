@@ -39,10 +39,15 @@ const config: Config = {
           "0%, 100%": { transform: "translateY(0px)", opacity: "0.55" },
           "50%": { transform: "translateY(-8px)", opacity: "1" },
         },
+        screenEnter: {
+          "0%": { opacity: "0", transform: "translateY(10px) scale(0.985)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
       },
       animation: {
         pulseIn: "pulseIn 1.2s ease-out forwards",
         floatGlow: "floatGlow 2.8s ease-in-out infinite",
+        screenEnter: "screenEnter 320ms cubic-bezier(0.22, 1, 0.36, 1)",
       },
     },
   },
