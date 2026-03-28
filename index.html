@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Получить местоположение</title>
+</head>
+<body>
+  <script>
+    const button = document.createElement("button");
+    button.textContent = "Получить местоположение";
+    button.onclick = getPosition;
+
+    
+    document.body.appendChild(button);
+
+    
+    function getPosition() {
+      
+      navigator.geolocation.getCurrentPosition(position => {
+        
+        const link = `https://www.openstreetmap.org/#map-18/` + position.coords.latitude + '/' + position.coords.longitude;
+
+        
+        if (link) {
+          button.style.visibility = "hidden";
+        }
+
+        
+        document.querySelector(".link").innerHTML = `<a href="${link}">Посмотреть местоположение</a>`;
+      });
+    }
+  </script>
+  <p class="link"></p>
+</body>
+</html>
