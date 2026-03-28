@@ -11,6 +11,8 @@ PURE ai is a mobile-first web application prototype built with Next.js, TypeScri
 - Library and profile sections powered by reusable mock data.
 - Centered mobile shell with an iOS-inspired visual presentation.
 - Blue-forward PURE branding, animated launch splash, and ocean video accent in the main app header.
+- Apple-like technology dashboard main menu with account panel and fast-action tiles.
+- Expanded diet discovery flow: popular diets, explore list, per-diet deep dives, and an “I'm not sure” AI quiz recommender.
 
 ## Getting Started
 
