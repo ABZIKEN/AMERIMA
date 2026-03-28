@@ -1,0 +1,41 @@
+import { ScanLine, Settings, Sparkles, UserRound } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export type AppTab = "Scan Food" | "AI Agent" | "Profile" | "Settings";
+
+const tabs = [
+  { label: "Scan Food", icon: ScanLine },
+  { label: "AI Agent", icon: Sparkles },
+  { label: "Profile", icon: UserRound },
+  { label: "Settings", icon: Settings },
+] as const;
+
+export function BottomNav({
+  active,
+  onChange,
+}: {
+  active: AppTab;
+  onChange: (tab: AppTab) => void;
+}) {
+  return (
+    <div className="sticky bottom-0 z-20 mt-auto border-t border-line/70 bg-surface/95 px-3 pb-6 pt-3 backdrop-blur">
+      <div className="grid grid-cols-4 gap-2 rounded-[28px] bg-[#eaf1ff] p-2 ring-1 ring-line/80">
+        {tabs.map(({ label, icon: Icon }) => (
+          <button
+            key={label}
+            onClick={() => onChange(label)}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-medium transition",
+              active === label
+                ? "bg-surface text-accentDeep shadow-sm"
+                : "text-muted",
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
