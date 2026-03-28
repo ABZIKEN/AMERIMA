@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Camera,
   ChevronRight,
+  Droplets,
   ImageIcon,
   ShieldCheck,
   SlidersHorizontal,
@@ -43,7 +44,11 @@ type ChatMessage = {
   text: string;
 };
 
+const OCEAN_VIDEO_URL =
+  "https://cdn.coverr.co/videos/coverr-aerial-view-of-ocean-waves-1579/1080p.mp4";
+
 export function PureApp() {
+  const [showSplash, setShowSplash] = useState(true);
   const [stage, setStage] = useState<Stage>("welcome");
   const [selectedDiets, setSelectedDiets] = useState<string[]>([
     "carnivore",
@@ -61,6 +66,11 @@ export function PureApp() {
     "It was butter basted",
   );
   const [libraryTab, setLibraryTab] = useState<LibraryTab>("History");
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowSplash(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const dietName = (id: string) =>
     dietOptions.find((diet) => diet.id === id)?.name ?? id;
@@ -119,75 +129,104 @@ export function PureApp() {
 
   return (
     <MobileShell>
-      <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
-        {stage === "welcome" && (
-          <WelcomeScreen
-            onGetStarted={() => setStage("onboarding")}
-            onUseExistingSettings={startPrototype}
-          />
-        )}
+      {showSplash ? (
+        <LaunchSplash />
+      ) : (
+        <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
+          {stage === "welcome" && (
+            <WelcomeScreen
+              onGetStarted={() => setStage("onboarding")}
+              onUseExistingSettings={startPrototype}
+            />
+          )}
 
-        {stage === "onboarding" && (
-          <OnboardingScreen
-            selectedDiets={selectedDiets}
-            primaryDiet={primaryDiet}
-            preferences={preferences}
-            onToggleDiet={toggleDiet}
-            onSetPrimaryDiet={setPrimaryDiet}
-            onChangePreferences={setPreferences}
-            onContinue={startPrototype}
-          />
-        )}
+          {stage === "onboarding" && (
+            <OnboardingScreen
+              selectedDiets={selectedDiets}
+              primaryDiet={primaryDiet}
+              preferences={preferences}
+              onToggleDiet={toggleDiet}
+              onSetPrimaryDiet={setPrimaryDiet}
+              onChangePreferences={setPreferences}
+              onContinue={startPrototype}
+            />
+          )}
 
-        {stage === "app" && (
-          <>
-            <div className="flex-1 overflow-y-auto px-4 pb-4">
-              <Header
-                primaryDiet={primaryDietName}
-                secondaryDiet={secondaryDietName}
-              />
-              {activeTab === "Scan" && (
-                <ScanScreen
-                  scanMode={scanMode}
-                  setScanMode={setScanMode}
-                  scanView={scanView}
-                  primaryDietName={primaryDietName}
-                  secondaryDietName={secondaryDietName}
-                  selectedFollowUp={selectedFollowUp}
-                  onSelectFollowUp={setSelectedFollowUp}
-                  onSimulateFood={() => simulateScan("food")}
-                  onSimulateProduct={() => simulateScan("product")}
-                  onOpenChat={() => setActiveTab("Chat")}
-                />
-              )}
-              {activeTab === "Chat" && (
-                <ChatScreen
-                  messages={chatMessages}
-                  selectedReply={selectedChatReply}
-                  outcome={currentChatOutcome}
-                  onSelectReply={applyChatReply}
-                />
-              )}
-              {activeTab === "Library" && (
-                <LibraryScreen
-                  activeTab={libraryTab}
-                  setActiveTab={setLibraryTab}
-                  items={libraryItems}
-                />
-              )}
-              {activeTab === "Profile" && (
-                <ProfileScreen
-                  selectedDiets={selectedDiets.map(dietName)}
+          {stage === "app" && (
+            <>
+              <div className="flex-1 overflow-y-auto px-4 pb-4">
+                <Header
                   primaryDiet={primaryDietName}
-                  preferences={preferences}
+                  secondaryDiet={secondaryDietName}
                 />
-              )}
-            </div>
-            <BottomNav active={activeTab} onChange={setActiveTab} />
-          </>
-        )}
-      </div>
+                {activeTab === "Scan" && (
+                  <ScanScreen
+                    scanMode={scanMode}
+                    setScanMode={setScanMode}
+                    scanView={scanView}
+                    primaryDietName={primaryDietName}
+                    secondaryDietName={secondaryDietName}
+                    selectedFollowUp={selectedFollowUp}
+                    onSelectFollowUp={setSelectedFollowUp}
+                    onSimulateFood={() => simulateScan("food")}
+                    onSimulateProduct={() => simulateScan("product")}
+                    onOpenChat={() => setActiveTab("Chat")}
+                  />
+                )}
+                {activeTab === "Chat" && (
+                  <ChatScreen
+                    messages={chatMessages}
+                    selectedReply={selectedChatReply}
+                    outcome={currentChatOutcome}
+                    onSelectReply={applyChatReply}
+                  />
+                )}
+                {activeTab === "Library" && (
+                  <LibraryScreen
+                    activeTab={libraryTab}
+                    setActiveTab={setLibraryTab}
+                    items={libraryItems}
+                  />
+                )}
+                {activeTab === "Profile" && (
+                  <ProfileScreen
+                    selectedDiets={selectedDiets.map(dietName)}
+                    primaryDiet={primaryDietName}
+                    preferences={preferences}
+                  />
+                )}
+              </div>
+              <BottomNav active={activeTab} onChange={setActiveTab} />
+            </>
+          )}
+        </div>
+      )}
     </MobileShell>
+  );
+}
+
+function LaunchSplash() {
+  return (
+    <div className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#f7faff_0%,#deebff_100%)] px-8 text-center">
+      <div className="absolute -left-24 top-20 h-48 w-48 rounded-full bg-[#7da8e8]/30 blur-3xl" />
+      <div className="absolute -right-20 bottom-24 h-56 w-56 rounded-full bg-[#5d8fd9]/25 blur-3xl" />
+
+      <div className="relative mb-8 h-24 w-24 animate-floatGlow rounded-[30px] bg-white/85 shadow-card ring-1 ring-line/80">
+        <div className="absolute inset-0 flex items-center justify-center text-accentDeep">
+          <Droplets className="h-10 w-10" />
+        </div>
+      </div>
+
+      <div className="animate-pulseIn">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.38em] text-accentDeep">
+          PURE ai
+        </p>
+        <h1 className="text-6xl font-semibold tracking-[-0.06em] text-accentDeep">
+          PURE
+        </h1>
+        <p className="mt-4 text-sm text-muted">You are what you eat.</p>
+      </div>
+    </div>
   );
 }
 
@@ -199,14 +238,14 @@ function Header({
   secondaryDiet: string;
 }) {
   return (
-    <div className="mb-5 rounded-[30px] bg-[#f7fbf6] px-4 pb-4 pt-6">
+    <div className="mb-5 rounded-[30px] bg-[#f4f8ff] px-4 pb-4 pt-6">
       <div className="mb-3 flex items-start justify-between gap-3">
         <div>
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-accentDeep">
             PURE ai
           </p>
           <h1 className="text-[28px] font-semibold leading-tight text-ink">
-            Food intelligence that feels pure.
+            Food intelligence in deep blue clarity.
           </h1>
         </div>
         <div className="rounded-2xl bg-tint px-3 py-2 text-right text-[11px] text-accentDeep">
@@ -214,10 +253,30 @@ function Header({
           <div className="font-semibold">{primaryDiet}</div>
         </div>
       </div>
-      <p className="text-sm text-muted">
-        Your current stack: {primaryDiet} + {secondaryDiet}. Scan food, labels,
-        and products in an iPhone-style prototype.
-      </p>
+      <div className="overflow-hidden rounded-2xl ring-1 ring-line/70">
+        <div className="relative h-24 w-full">
+          <video
+            className="h-full w-full object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          >
+            <source src={OCEAN_VIDEO_URL} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(16,36,63,0.72),rgba(16,36,63,0.34))]" />
+          <div className="absolute inset-0 flex items-end justify-between p-3 text-white">
+            <p className="max-w-[65%] text-xs leading-5">
+              Your stack: {primaryDiet} + {secondaryDiet}. Scan food, labels,
+              and products in a blue-themed iPhone prototype.
+            </p>
+            <span className="rounded-full bg-white/20 px-2 py-1 text-[10px] font-semibold backdrop-blur">
+              Ocean mode
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -234,25 +293,25 @@ function WelcomeScreen({
       <div className="space-y-8">
         <div className="grid h-16 w-16 grid-cols-4 gap-2 rounded-3xl bg-surface p-3 shadow-card">
           {Array.from({ length: 16 }).map((_, index) => (
-            <span key={index} className="rounded-full bg-[#4b7cd9]" />
+            <span key={index} className="rounded-full bg-[#6f9ee3]" />
           ))}
         </div>
         <div>
-          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.36em] text-[#4b7cd9]">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.36em] text-accentDeep">
             PURE ai
           </p>
-          <h2 className="text-5xl font-semibold tracking-[-0.05em] text-[#4b7cd9]">
+          <h2 className="text-5xl font-semibold tracking-[-0.05em] text-accentDeep">
             PURE
           </h2>
-          <div className="mt-4 h-px w-full bg-[#4b7cd9]/50" />
+          <div className="mt-4 h-px w-full bg-accentDeep/40" />
         </div>
         <div className="space-y-3">
           <h3 className="text-3xl font-semibold leading-tight text-ink">
             Scan food. Match your diet. Learn what’s truly pure.
           </h3>
           <p className="text-sm leading-6 text-muted">
-            A premium health-tech experience inspired by the brand style: clean
-            white space, crisp blue-green accents, and a calm iOS-native feel.
+            A premium health-tech experience with ocean-inspired visuals, calm
+            motion, and clear dietary insights.
           </p>
         </div>
         <Card className="bg-waves p-5">
@@ -334,7 +393,7 @@ function OnboardingScreen({
                   "w-full rounded-[24px] border p-4 text-left transition",
                   selected
                     ? "border-accentDeep bg-tint/70"
-                    : "border-line bg-[#fafdfa]",
+                    : "border-line bg-[#f8faff]",
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -349,13 +408,13 @@ function OnboardingScreen({
                   )}
                 </div>
                 {selected && (
-                  <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/80 px-3 py-2 text-xs text-muted">
+                  <div className="mt-3 flex items-center justify-between rounded-2xl bg-white/90 px-3 py-2 text-xs text-muted">
                     <span>{isPrimary ? "Primary diet" : "Set as primary"}</span>
                     <input
                       type="radio"
                       checked={isPrimary}
                       onChange={() => onSetPrimaryDiet(diet.id)}
-                      className="h-4 w-4 accent-[#2f8f59]"
+                      className="h-4 w-4 accent-[#5d8fd9]"
                     />
                   </div>
                 )}
@@ -487,7 +546,7 @@ function ToggleRow({
   return (
     <button
       onClick={onToggle}
-      className="flex items-center justify-between rounded-2xl bg-[#f6faf6] px-3 py-3 text-left ring-1 ring-line"
+      className="flex items-center justify-between rounded-2xl bg-[#f1f6ff] px-3 py-3 text-left ring-1 ring-line"
     >
       <span className="pr-2 text-sm text-ink">{label}</span>
       <span
@@ -544,7 +603,7 @@ function ScanScreen({
             </Chip>
           ))}
         </div>
-        <div className="relative rounded-[30px] border border-dashed border-accentDeep/30 bg-[linear-gradient(180deg,#f9fcf7_0%,#edf7ef_100%)] p-5">
+        <div className="relative rounded-[30px] border border-dashed border-accentDeep/30 bg-[linear-gradient(180deg,#f7faff_0%,#eaf2ff_100%)] p-5">
           <div className="absolute inset-5 rounded-[24px] border border-accentDeep/20" />
           <div className="relative flex min-h-[260px] flex-col items-center justify-center text-center">
             <div className="mb-4 rounded-full bg-surface p-4 text-accentDeep shadow-card">
@@ -584,7 +643,7 @@ function ScanScreen({
       {scanView === "food-result" && (
         <Card className="space-y-4 p-4">
           <div className="flex gap-4">
-            <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,#d9f0df,#f6ead4)] text-center text-xs font-medium text-accentDeep">
+            <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,#dce9ff,#e6f2ff)] text-center text-xs font-medium text-accentDeep">
               {foodResult.imageLabel}
             </div>
             <div className="flex-1">
@@ -612,7 +671,7 @@ function ScanScreen({
             <Metric label="Fat" value={foodResult.macros.fat} />
             <Metric label="Carbs" value={foodResult.macros.carbs} />
           </div>
-          <div className="rounded-[24px] bg-[#f7fbf8] p-4 ring-1 ring-line/80">
+          <div className="rounded-[24px] bg-[#f4f8ff] p-4 ring-1 ring-line/80">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-semibold text-ink">Confidence</p>
               <span className="rounded-full bg-tint px-3 py-1 text-xs font-semibold text-accentDeep">
@@ -698,7 +757,7 @@ function ScanScreen({
 
 function DietFit({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[#f7fbf8] px-3 py-3 ring-1 ring-line/70">
+    <div className="flex items-center justify-between rounded-2xl bg-[#f4f8ff] px-3 py-3 ring-1 ring-line/70">
       <span className="font-medium text-ink">{label}</span>
       <span className="text-xs font-semibold text-accentDeep">{value}</span>
     </div>
@@ -707,7 +766,7 @@ function DietFit({ label, value }: { label: string; value: string }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-[#f7fbf8] px-2 py-3 text-center ring-1 ring-line/70">
+    <div className="rounded-2xl bg-[#f4f8ff] px-2 py-3 text-center ring-1 ring-line/70">
       <div className="text-[11px] uppercase tracking-[0.12em] text-muted">
         {label}
       </div>
@@ -746,7 +805,7 @@ function InfoBlock({
   positive?: boolean;
 }) {
   return (
-    <div className="rounded-[24px] bg-[#f7fbf8] p-4 ring-1 ring-line/70">
+    <div className="rounded-[24px] bg-[#f4f8ff] p-4 ring-1 ring-line/70">
       <div className="mb-2 text-sm font-semibold text-ink">{title}</div>
       <ul className="space-y-2 text-sm text-muted">
         {items.map((item) => (
@@ -805,7 +864,7 @@ function ChatScreen({
                 className={cn(
                   "max-w-[80%] rounded-[24px] px-4 py-3 text-sm leading-6",
                   message.role === "assistant"
-                    ? "bg-[#f3f7f3] text-ink"
+                    ? "bg-[#edf4ff] text-ink"
                     : "bg-accentDeep text-white",
                 )}
               >
@@ -885,7 +944,7 @@ function LibraryScreen({
       <div className="space-y-3">
         {items.map((item) => (
           <Card key={item.id} className="flex items-center gap-3 p-3">
-            <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-[linear-gradient(135deg,#dff4e6,#e7eefb)] text-[11px] font-semibold text-accentDeep">
+            <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-[linear-gradient(135deg,#dce9ff,#e6f2ff)] text-[11px] font-semibold text-accentDeep">
               {item.kind}
             </div>
             <div className="min-w-0 flex-1">
@@ -933,7 +992,7 @@ function ProfileScreen({
         {selectedDiets.map((diet) => (
           <div
             key={diet}
-            className="flex items-center justify-between rounded-2xl bg-[#f7fbf8] px-3 py-3 ring-1 ring-line/70"
+            className="flex items-center justify-between rounded-2xl bg-[#f4f8ff] px-3 py-3 ring-1 ring-line/70"
           >
             <span className="text-sm text-ink">{diet}</span>
             {diet === primaryDiet && (
@@ -976,7 +1035,7 @@ function ProfileScreen({
 
 function ProfileRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[#f7fbf8] px-3 py-3 text-sm ring-1 ring-line/70">
+    <div className="flex items-center justify-between rounded-2xl bg-[#f4f8ff] px-3 py-3 text-sm ring-1 ring-line/70">
       <span className="text-muted">{label}</span>
       <span className="max-w-[55%] text-right font-medium text-ink">
         {value}

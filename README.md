@@ -10,6 +10,7 @@ PURE ai is a mobile-first web application prototype built with Next.js, TypeScri
 - Contextual chat flow with quick replies that visually update the verdict.
 - Library and profile sections powered by reusable mock data.
 - Centered mobile shell with an iOS-inspired visual presentation.
+- Blue-forward PURE branding, animated launch splash, and ocean video accent in the main app header.
 
 ## Getting Started
 

@@ -11,7 +11,7 @@
 }
 
 html {
-  background: #eef3ee;
+  background: #e8f0ff;
 }
 
 body {
@@ -20,11 +20,11 @@ body {
   background:
     radial-gradient(
       circle at top left,
-      rgba(56, 132, 255, 0.08),
-      transparent 24%
+      rgba(93, 143, 217, 0.15),
+      transparent 28%
     ),
-    linear-gradient(180deg, #f8fbf8 0%, #edf4ed 100%);
-  color: #183126;
+    linear-gradient(180deg, #f6f9ff 0%, #e9f1ff 100%);
+  color: #10243f;
 }
 
 button,
@@ -36,4 +36,8 @@ select {
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+video {
+  display: block;
 }

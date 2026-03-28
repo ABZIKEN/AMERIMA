@@ -9,25 +9,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#f4f7f2",
+        background: "#eef4ff",
         surface: "#ffffff",
-        tint: "#dff4e6",
-        accent: "#6bbf84",
-        accentDeep: "#2f8f59",
-        ink: "#183126",
-        muted: "#6f7e76",
-        line: "#d9e4db",
+        tint: "#e5efff",
+        accent: "#7da8e8",
+        accentDeep: "#5d8fd9",
+        ink: "#10243f",
+        muted: "#5f6f85",
+        line: "#d5e2f8",
       },
       boxShadow: {
-        device: "0 24px 60px rgba(20, 40, 29, 0.12)",
-        card: "0 12px 30px rgba(20, 40, 29, 0.08)",
+        device: "0 24px 60px rgba(26, 59, 110, 0.18)",
+        card: "0 12px 30px rgba(33, 81, 150, 0.14)",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       backgroundImage: {
         waves:
-          "radial-gradient(circle at top right, rgba(70, 132, 255, 0.18), transparent 35%), linear-gradient(135deg, rgba(107,191,132,0.1), transparent 50%)",
+          "radial-gradient(circle at top right, rgba(93, 143, 217, 0.3), transparent 35%), linear-gradient(135deg, rgba(125,168,232,0.22), transparent 55%)",
+      },
+      keyframes: {
+        pulseIn: {
+          "0%": { opacity: "0", transform: "scale(0.85)" },
+          "35%": { opacity: "1", transform: "scale(1.04)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        floatGlow: {
+          "0%, 100%": { transform: "translateY(0px)", opacity: "0.55" },
+          "50%": { transform: "translateY(-8px)", opacity: "1" },
+        },
+      },
+      animation: {
+        pulseIn: "pulseIn 1.2s ease-out forwards",
+        floatGlow: "floatGlow 2.8s ease-in-out infinite",
       },
     },
   },

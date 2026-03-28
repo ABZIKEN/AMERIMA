@@ -5,7 +5,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-waves px-4 py-6 sm:px-6">
       <div className="mx-auto flex min-h-[100dvh] max-w-6xl items-center justify-center">
-        <div className="relative w-full max-w-[430px] overflow-hidden rounded-[42px] border border-white/60 bg-[#f8fbf8] shadow-device backdrop-blur">
+        <div className="relative w-full max-w-[430px] overflow-hidden rounded-[42px] border border-white/70 bg-[#f6f9ff] shadow-device backdrop-blur">
           <div className="absolute inset-x-0 top-0 z-20 flex justify-center pt-3">
             <div className="h-7 w-36 rounded-full bg-[#111111]" />
           </div>

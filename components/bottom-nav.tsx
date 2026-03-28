@@ -19,7 +19,7 @@ export function BottomNav({
 }) {
   return (
     <div className="sticky bottom-0 z-20 mt-auto border-t border-line/70 bg-surface/95 px-3 pb-6 pt-3 backdrop-blur">
-      <div className="grid grid-cols-4 gap-2 rounded-[28px] bg-[#f2f6f1] p-2 ring-1 ring-line/80">
+      <div className="grid grid-cols-4 gap-2 rounded-[28px] bg-[#eaf1ff] p-2 ring-1 ring-line/80">
         {tabs.map(({ label, icon: Icon }) => (
           <button
             key={label}
