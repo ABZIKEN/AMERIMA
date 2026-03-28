@@ -1,13 +1,13 @@
-import { BookOpen, MessageCircleMore, ScanLine, UserRound } from "lucide-react";
+import { ScanLine, Settings, Sparkles, UserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type AppTab = "Scan" | "Chat" | "Library" | "Profile";
+export type AppTab = "Scan Food" | "AI Agent" | "Profile" | "Settings";
 
 const tabs = [
-  { label: "Scan", icon: ScanLine },
-  { label: "Chat", icon: MessageCircleMore },
-  { label: "Library", icon: BookOpen },
+  { label: "Scan Food", icon: ScanLine },
+  { label: "AI Agent", icon: Sparkles },
   { label: "Profile", icon: UserRound },
+  { label: "Settings", icon: Settings },
 ] as const;
 
 export function BottomNav({
