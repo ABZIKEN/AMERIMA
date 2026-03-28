@@ -46,6 +46,7 @@ import { cn } from "@/lib/utils";
 type ScanView = "idle" | "food-result" | "product-result";
 type LibraryTab = "History" | "Saved" | "Certified";
 type HomeView =
+  | "diet-entry"
   | "main"
   | "scan"
   | "library"
@@ -66,7 +67,7 @@ const OCEAN_VIDEO_URL =
 export function PureApp() {
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState<AppTab>("Scan Food");
-  const [homeView, setHomeView] = useState<HomeView>("main");
+  const [homeView, setHomeView] = useState<HomeView>("diet-entry");
   const [focusDietId, setFocusDietId] = useState<string>("keto");
 
   const [selectedDiets, setSelectedDiets] = useState<string[]>([
@@ -89,7 +90,7 @@ export function PureApp() {
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setShowSplash(false), 2200);
+    const timer = window.setTimeout(() => setShowSplash(false), 5000);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -190,6 +191,16 @@ export function PureApp() {
               primaryDiet={primaryDietName}
               secondaryDiet={secondaryDietName}
             />
+
+            {activeTab === "Scan Food" && homeView === "diet-entry" && (
+              <DietEntryScreen
+                popularDiets={popularDiets}
+                onOpenExplore={() => setHomeView("explore")}
+                onOpenDiet={openDietDetail}
+                onOpenUnsure={() => setHomeView("diet-quiz")}
+                onContinue={() => setHomeView("main")}
+              />
+            )}
 
             {activeTab === "Scan Food" && homeView === "main" && (
               <MainDashboard
@@ -299,7 +310,7 @@ export function PureApp() {
             active={activeTab}
             onChange={(tab) => {
               setActiveTab(tab);
-              if (tab === "Scan Food") setHomeView("main");
+              if (tab === "Scan Food") setHomeView("diet-entry");
             }}
           />
         </div>
@@ -377,6 +388,86 @@ function Header({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function DietEntryScreen({
+  popularDiets,
+  onOpenExplore,
+  onOpenDiet,
+  onOpenUnsure,
+  onContinue,
+}: {
+  popularDiets: DietKnowledge[];
+  onOpenExplore: () => void;
+  onOpenDiet: (dietId: string) => void;
+  onOpenUnsure: () => void;
+  onContinue: () => void;
+}) {
+  return (
+    <div className="space-y-4 pb-4">
+      <Card className="p-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accentDeep">
+          First step
+        </p>
+        <h3 className="mt-1 text-2xl font-semibold text-ink">
+          Choose your diet direction
+        </h3>
+        <p className="mt-2 text-sm text-muted">
+          Start with popular diets, explore all options, or let PURE ai
+          determine the best fit with quick questions.
+        </p>
+      </Card>
+
+      <Card className="p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-ink">Popular</h4>
+          <button
+            onClick={onOpenExplore}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-accentDeep"
+          >
+            Explore <Compass className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="space-y-2">
+          {popularDiets.map((diet) => (
+            <button
+              key={diet.id}
+              onClick={() => onOpenDiet(diet.id)}
+              className="w-full rounded-2xl bg-[#f4f8ff] px-3 py-3 text-left ring-1 ring-line"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-ink">{diet.name}</span>
+                <span className="text-xs font-semibold text-accentDeep">
+                  See more
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted">{diet.summary}</p>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="bg-waves p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-sm font-semibold text-ink">I&apos;m not sure</p>
+            <p className="mt-1 text-xs text-muted">
+              PURE ai asks 2 to 4 questions and then recommends your most
+              suitable diet.
+            </p>
+          </div>
+          <Bot className="mt-1 h-5 w-5 text-accentDeep" />
+        </div>
+        <Button className="mt-3" fullWidth onClick={onOpenUnsure}>
+          Start AI diet finder
+        </Button>
+      </Card>
+
+      <Button fullWidth variant="secondary" onClick={onContinue}>
+        Continue to main page
+      </Button>
     </div>
   );
 }
