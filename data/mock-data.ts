@@ -392,3 +392,74 @@ export const dietQuizRecommendations: Record<string, string> = {
   Flexible: "mediterranean",
   "I need AI guidance first": "high-protein",
 };
+
+export type DatabaseArticle = {
+  id: string;
+  title: string;
+  source: "PURE AI Official" | "PURE AI Research";
+  summary: string;
+  readTime: string;
+};
+
+export type FeedPost = {
+  id: string;
+  author: string;
+  topic: string;
+  body: string;
+  likes: number;
+  comments: number;
+};
+
+export const databaseArticles: DatabaseArticle[] = [
+  {
+    id: "a1",
+    title: "PURE Certified Framework 2026",
+    source: "PURE AI Official",
+    summary:
+      "How PURE scores ingredient quality, processing risk, and diet compatibility for labels and products.",
+    readTime: "4 min",
+  },
+  {
+    id: "a2",
+    title: "Understanding Confidence in Food Verdicts",
+    source: "PURE AI Official",
+    summary:
+      "A practical explainer of confidence percentages and what inputs can increase verdict reliability.",
+    readTime: "5 min",
+  },
+  {
+    id: "a3",
+    title: "AI Nutrition Signals for Personalized Diet Fit",
+    source: "PURE AI Research",
+    summary:
+      "How meal context, ingredient patterns, and follow-up answers improve personalization quality.",
+    readTime: "6 min",
+  },
+  {
+    id: "a4",
+    title: "Why Processing Level Matters More Than Calories Alone",
+    source: "PURE AI Research",
+    summary:
+      "A research brief on additive density, oxidation risk, and the role of preparation methods.",
+    readTime: "7 min",
+  },
+];
+
+export const communityFeed: FeedPost[] = [
+  {
+    id: "f1",
+    author: "Rashid K.",
+    topic: "Carnivore diet progress",
+    body: "Week 6 on carnivore: better satiety and fewer cravings. Curious how others handle electrolytes and training days.",
+    likes: 28,
+    comments: 14,
+  },
+  {
+    id: "f2",
+    author: "Lena M.",
+    topic: "Are nonstick pans harmful?",
+    body: "I replaced old scratched nonstick pans and felt better about cooking safety. What cookware do you trust most?",
+    likes: 42,
+    comments: 26,
+  },
+];

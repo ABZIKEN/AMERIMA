@@ -27,6 +27,8 @@ import {
   chatOutcomes,
   chatQuickReplies,
   chatSeeds,
+  communityFeed,
+  databaseArticles,
   defaultPreferences,
   dietKnowledge,
   dietQuizQuestions,
@@ -280,7 +282,10 @@ export function PureApp() {
             )}
 
             {activeTab === "Scan Food" && homeView === "database" && (
-              <DatabaseScreen onBack={() => setHomeView("main")} />
+              <DatabaseScreen
+                onBack={() => setHomeView("main")}
+                onDiscussWithAi={() => setActiveTab("AI Agent")}
+              />
             )}
 
             {activeTab === "AI Agent" && (
@@ -692,16 +697,96 @@ function RecipesScreen({ onBack }: { onBack: () => void }) {
   );
 }
 
-function DatabaseScreen({ onBack }: { onBack: () => void }) {
+function DatabaseScreen({
+  onBack,
+  onDiscussWithAi,
+}: {
+  onBack: () => void;
+  onDiscussWithAi: () => void;
+}) {
   return (
     <div className="animate-screenEnter space-y-4 pb-4">
       <BackButton onBack={onBack} />
+
       <Card className="space-y-3 p-4">
-        <h3 className="text-xl font-semibold text-ink">PURE database</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-ink">PURE database</h3>
+          <span className="rounded-full bg-tint px-2 py-1 text-[11px] font-semibold text-accentDeep">
+            Official
+          </span>
+        </div>
         <p className="text-sm text-muted">
-          Database placeholder for certified products and ingredient
-          intelligence.
+          Official PURE AI company information and articles for users to read.
         </p>
+        <div className="space-y-3">
+          {databaseArticles.map((article) => (
+            <div
+              key={article.id}
+              className="rounded-2xl bg-[#f4f8ff] p-3 ring-1 ring-line"
+            >
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-ink">
+                  {article.title}
+                </p>
+                <span className="shrink-0 text-[11px] text-muted">
+                  {article.readTime}
+                </span>
+              </div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accentDeep">
+                {article.source}
+              </p>
+              <p className="text-sm text-muted">{article.summary}</p>
+              <Button
+                className="mt-3 h-9 px-3 text-xs"
+                variant="secondary"
+                onClick={onDiscussWithAi}
+              >
+                Discuss with AI
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="space-y-3 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-ink">Community feed</h3>
+          <span className="rounded-full bg-[#edf4ff] px-2 py-1 text-[11px] font-semibold text-accentDeep">
+            Feed
+          </span>
+        </div>
+        <p className="text-sm text-muted">
+          Users share their own discussions and can discuss the same topics with
+          AI.
+        </p>
+        <div className="space-y-3">
+          {communityFeed.map((post) => (
+            <div
+              key={post.id}
+              className="rounded-2xl bg-[#f4f8ff] p-3 ring-1 ring-line"
+            >
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-sm font-semibold text-ink">{post.topic}</p>
+                <span className="shrink-0 text-[11px] text-muted">
+                  by {post.author}
+                </span>
+              </div>
+              <p className="text-sm text-muted">{post.body}</p>
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <p className="text-[11px] text-muted">
+                  {post.likes} likes · {post.comments} comments
+                </p>
+                <Button
+                  className="h-9 px-3 text-xs"
+                  variant="ghost"
+                  onClick={onDiscussWithAi}
+                >
+                  Discuss with AI
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </Card>
     </div>
   );
