@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Bot,
@@ -29,6 +29,7 @@ import {
   chatSeeds,
   communityFeed,
   databaseArticles,
+  certifiedCompanies,
   defaultPreferences,
   dietKnowledge,
   dietQuizQuestions,
@@ -87,6 +88,8 @@ export function PureApp() {
   const [selectedChatReply, setSelectedChatReply] = useState<string>(
     "It was butter basted",
   );
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
 
   const [libraryTab, setLibraryTab] = useState<LibraryTab>("History");
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
@@ -159,6 +162,58 @@ export function PureApp() {
     setHomeView("diet-detail");
   };
 
+  const chooseDietAndContinue = (dietId: string) => {
+    if (!selectedDiets.includes(dietId)) {
+      setSelectedDiets((current) =>
+        current.length < 2 ? [...current, dietId] : [dietId, current[0]],
+      );
+    }
+    setPrimaryDiet(dietId);
+    setHomeView("main");
+  };
+
+  const sendAiMessage = async (message: string) => {
+    const trimmed = message.trim();
+    if (!trimmed || chatLoading) return;
+
+    setChatInput("");
+    setChatLoading(true);
+    setChatMessages((current) => [...current, { role: "user", text: trimmed }]);
+
+    try {
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: trimmed,
+          context: {
+            primaryDiet: primaryDietName,
+            secondaryDiet: secondaryDietName,
+          },
+        }),
+      });
+
+      const payload = await response.json();
+      const reply =
+        payload?.answer ||
+        "PURE AI is temporarily unavailable. Please try again in a moment.";
+      setChatMessages((current) => [
+        ...current,
+        { role: "assistant", text: reply },
+      ]);
+    } catch {
+      setChatMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text: "Network issue while contacting PURE AI. Please retry.",
+        },
+      ]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const mainButtons = [
     { label: "Scan food", icon: ScanLine, action: () => setHomeView("scan") },
     {
@@ -201,6 +256,7 @@ export function PureApp() {
                 onOpenDiet={openDietDetail}
                 onOpenUnsure={() => setHomeView("diet-quiz")}
                 onContinue={() => setHomeView("main")}
+                onChooseDiet={chooseDietAndContinue}
               />
             )}
 
@@ -209,6 +265,7 @@ export function PureApp() {
                 userName="Rashid"
                 mainButtons={mainButtons}
                 popularDiets={popularDiets}
+                certifiedCompanies={certifiedCompanies}
                 onOpenDiet={openDietDetail}
               />
             )}
@@ -271,8 +328,7 @@ export function PureApp() {
                   ) {
                     setSelectedDiets((current) => [...current, dietId]);
                   }
-                  setPrimaryDiet(dietId);
-                  openDietDetail(dietId);
+                  chooseDietAndContinue(dietId);
                 }}
               />
             )}
@@ -294,6 +350,10 @@ export function PureApp() {
                 selectedReply={selectedChatReply}
                 outcome={currentChatOutcome}
                 onSelectReply={applyChatReply}
+                chatInput={chatInput}
+                setChatInput={setChatInput}
+                onSendMessage={sendAiMessage}
+                loading={chatLoading}
               />
             )}
 

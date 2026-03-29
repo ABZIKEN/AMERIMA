@@ -463,3 +463,37 @@ export const communityFeed: FeedPost[] = [
     comments: 26,
   },
 ];
+
+export type CertifiedCompany = {
+  id: string;
+  name: string;
+  badge: string;
+  note: string;
+};
+
+export const certifiedCompanies: CertifiedCompany[] = [
+  {
+    id: "ocean-basket",
+    name: "Ocean Basket",
+    badge: "OB",
+    note: "Seafood-forward menu with cleaner oil and ingredient standards.",
+  },
+  {
+    id: "la-creme",
+    name: "La Crème Boutique",
+    badge: "LC",
+    note: "Dairy-focused products with transparent sourcing and additive checks.",
+  },
+  {
+    id: "faro",
+    name: "FARO",
+    badge: "FR",
+    note: "Certified kitchen process and label verification for menu consistency.",
+  },
+  {
+    id: "discovery-coffee",
+    name: "Discovery Coffee",
+    badge: "DC",
+    note: "Coffee and snacks reviewed for sweetener quality and ingredient purity.",
+  },
+];
