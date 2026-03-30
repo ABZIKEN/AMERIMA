@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   Bot,
@@ -64,6 +64,24 @@ type ChatMessage = {
   text: string;
 };
 
+type ScanNutrients = {
+  calories?: string;
+  protein?: string;
+  fats?: string;
+  carbs?: string;
+  vitamins?: string[];
+  minerals?: string[];
+};
+
+type ScanAiResult = {
+  title: string;
+  summary: string;
+  likelyItems: string[];
+  nutrients: ScanNutrients;
+  confidence: string;
+  followUpPrompts: string[];
+};
+
 const OCEAN_VIDEO_URL =
   "https://cdn.coverr.co/videos/coverr-aerial-view-of-ocean-waves-1579/1080p.mp4";
 
@@ -83,6 +101,11 @@ export function PureApp() {
   const [scanMode, setScanMode] = useState<ScanMode>("Food");
   const [scanView, setScanView] = useState<ScanView>("idle");
   const [selectedFollowUp, setSelectedFollowUp] = useState<string | null>(null);
+  const [scanImagePreview, setScanImagePreview] = useState<string | null>(null);
+  const [scanImageBase64, setScanImageBase64] = useState<string | null>(null);
+  const [scanAiResult, setScanAiResult] = useState<ScanAiResult | null>(null);
+  const [scanLoading, setScanLoading] = useState(false);
+  const [scanError, setScanError] = useState<string | null>(null);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(chatSeeds);
   const [selectedChatReply, setSelectedChatReply] = useState<string>(
@@ -214,6 +237,62 @@ export function PureApp() {
     }
   };
 
+  const handleImageSelection = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result ?? "");
+      const [, base64 = ""] = result.split(",");
+      setScanImagePreview(result);
+      setScanImageBase64(base64);
+      setScanAiResult(null);
+      setScanError(null);
+      setScanView("idle");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const runAiScan = async (focus: string) => {
+    if (!scanImageBase64 || scanLoading) return;
+    setScanLoading(true);
+    setScanError(null);
+
+    try {
+      const response = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageBase64: scanImageBase64,
+          context: {
+            primaryDiet: primaryDietName,
+            secondaryDiet: secondaryDietName,
+            focus,
+          },
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          payload?.answer ?? "PURE AI scan is unavailable right now.",
+        );
+      }
+
+      setScanAiResult(payload.scanResult);
+      setScanView("food-result");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "PURE AI scan failed. Please try another image.";
+      setScanError(message);
+    } finally {
+      setScanLoading(false);
+    }
+  };
+
   const mainButtons = [
     { label: "Scan food", icon: ScanLine, action: () => setHomeView("scan") },
     {
@@ -281,6 +360,12 @@ export function PureApp() {
                 onSelectFollowUp={setSelectedFollowUp}
                 onSimulateFood={() => setScanView("food-result")}
                 onSimulateProduct={() => setScanView("product-result")}
+                scanImagePreview={scanImagePreview}
+                onImageSelect={handleImageSelection}
+                onRunAiScan={runAiScan}
+                scanAiResult={scanAiResult}
+                scanLoading={scanLoading}
+                scanError={scanError}
                 onOpenChat={() => setActiveTab("AI Agent")}
                 onBack={() => setHomeView("main")}
               />
@@ -463,12 +548,14 @@ function DietEntryScreen({
   onOpenDiet,
   onOpenUnsure,
   onContinue,
+  onChooseDiet,
 }: {
   popularDiets: DietKnowledge[];
   onOpenExplore: () => void;
   onOpenDiet: (dietId: string) => void;
   onOpenUnsure: () => void;
   onContinue: () => void;
+  onChooseDiet: (dietId: string) => void;
 }) {
   return (
     <div className="animate-screenEnter space-y-4 pb-4">
@@ -497,19 +584,26 @@ function DietEntryScreen({
         </div>
         <div className="space-y-2">
           {popularDiets.map((diet) => (
-            <button
+            <div
               key={diet.id}
-              onClick={() => onOpenDiet(diet.id)}
-              className="w-full rounded-2xl bg-[#f4f8ff] px-3 py-3 text-left ring-1 ring-line"
+              className="rounded-2xl bg-[#f4f8ff] px-3 py-3 text-left ring-1 ring-line"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-ink">{diet.name}</span>
-                <span className="text-xs font-semibold text-accentDeep">
-                  See more
-                </span>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={() => onOpenDiet(diet.id)}
+                  className="text-left font-semibold text-ink"
+                >
+                  {diet.name}
+                </button>
+                <button
+                  onClick={() => onChooseDiet(diet.id)}
+                  className="rounded-full bg-tint px-2 py-1 text-xs font-semibold text-accentDeep"
+                >
+                  Choose
+                </button>
               </div>
               <p className="mt-1 text-xs text-muted">{diet.summary}</p>
-            </button>
+            </div>
           ))}
         </div>
       </Card>
@@ -541,6 +635,7 @@ function MainDashboard({
   userName,
   mainButtons,
   popularDiets,
+  certifiedCompanies,
   onOpenDiet,
 }: {
   userName: string;
@@ -550,6 +645,12 @@ function MainDashboard({
     action: () => void;
   }>;
   popularDiets: DietKnowledge[];
+  certifiedCompanies: Array<{
+    id: string;
+    name: string;
+    badge: string;
+    note: string;
+  }>;
   onOpenDiet: (dietId: string) => void;
 }) {
   return (
@@ -608,6 +709,22 @@ function MainDashboard({
               </div>
               <p className="mt-1 text-xs text-muted">{diet.summary}</p>
             </button>
+          ))}
+        </div>
+      </Card>
+      <Card className="p-4">
+        <h3 className="mb-3 text-sm font-semibold text-ink">Certified brands</h3>
+        <div className="space-y-2">
+          {certifiedCompanies.slice(0, 3).map((company) => (
+            <div
+              key={company.id}
+              className="flex items-center justify-between rounded-2xl bg-[#f4f8ff] px-3 py-2 text-sm ring-1 ring-line"
+            >
+              <span className="font-medium text-ink">{company.name}</span>
+              <span className="text-xs font-semibold text-accentDeep">
+                {company.badge}
+              </span>
+            </div>
           ))}
         </div>
       </Card>
@@ -873,6 +990,12 @@ function ScanScreen({
   onSelectFollowUp,
   onSimulateFood,
   onSimulateProduct,
+  scanImagePreview,
+  onImageSelect,
+  onRunAiScan,
+  scanAiResult,
+  scanLoading,
+  scanError,
   onOpenChat,
   onBack,
 }: {
@@ -885,6 +1008,12 @@ function ScanScreen({
   onSelectFollowUp: (value: string) => void;
   onSimulateFood: () => void;
   onSimulateProduct: () => void;
+  scanImagePreview: string | null;
+  onImageSelect: (event: ChangeEvent<HTMLInputElement>) => void;
+  onRunAiScan: (focus: string) => Promise<void>;
+  scanAiResult: ScanAiResult | null;
+  scanLoading: boolean;
+  scanError: string | null;
   onOpenChat: () => void;
   onBack: () => void;
 }) {
@@ -918,10 +1047,16 @@ function ScanScreen({
                 <Camera className="mr-1 h-3.5 w-3.5" />
                 Camera
               </Button>
-              <Button variant="ghost" className="h-11 px-2 text-xs">
+              <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-2xl bg-surface px-2 text-xs font-semibold text-ink ring-1 ring-line hover:bg-[#f2f7ff]">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={onImageSelect}
+                  className="hidden"
+                />
                 <ImageIcon className="mr-1 h-3.5 w-3.5" />
                 Gallery
-              </Button>
+              </label>
               <Button variant="ghost" className="h-11 px-2 text-xs">
                 Manual
               </Button>
@@ -929,6 +1064,65 @@ function ScanScreen({
           </div>
         </div>
       </Card>
+      {scanImagePreview && (
+        <Card className="space-y-3 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-ink">
+              AI scan preview ready
+            </h3>
+            <span className="text-xs font-semibold text-accentDeep">
+              Upload complete
+            </span>
+          </div>
+          <img
+            src={scanImagePreview}
+            alt="Uploaded scan preview"
+            className="h-44 w-full rounded-2xl object-cover ring-1 ring-line"
+          />
+          <p className="text-xs text-muted">
+            Start with AI overview, then tap specific nutrient buttons that AI
+            recommends.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              onClick={() => onRunAiScan("overview")}
+              disabled={scanLoading}
+              className="h-10 text-xs"
+            >
+              {scanLoading ? "Scanning..." : "AI overview"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => onRunAiScan("calories protein fats carbs")}
+              disabled={scanLoading}
+              className="h-10 text-xs"
+            >
+              Macros
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => onRunAiScan("vitamins minerals micronutrients")}
+              disabled={scanLoading}
+              className="h-10 text-xs"
+            >
+              Vitamins & minerals
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => onRunAiScan("diet fit and risk notes")}
+              disabled={scanLoading}
+              className="h-10 text-xs"
+            >
+              Diet fit details
+            </Button>
+          </div>
+          {scanError && (
+            <div className="rounded-2xl bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-rose-200">
+              {scanError}
+            </div>
+          )}
+        </Card>
+      )}
       <div className="grid grid-cols-2 gap-3">
         <Button fullWidth onClick={onSimulateFood}>
           Simulate food scan
@@ -942,14 +1136,14 @@ function ScanScreen({
         <Card className="space-y-4 p-4">
           <div className="flex gap-4">
             <div className="flex h-24 w-24 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,#dce9ff,#e6f2ff)] text-center text-xs font-medium text-accentDeep">
-              {foodResult.imageLabel}
+              {scanAiResult?.title ?? foodResult.imageLabel}
             </div>
             <div className="flex-1">
               <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
                 Food result
               </div>
               <h3 className="mt-1 text-xl font-semibold text-ink">
-                {foodResult.name}
+                {scanAiResult?.title ?? foodResult.name}
               </h3>
               <div className="mt-3 space-y-2 text-sm">
                 <DietFit
@@ -967,11 +1161,14 @@ function ScanScreen({
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-semibold text-ink">Confidence</p>
               <span className="rounded-full bg-tint px-3 py-1 text-xs font-semibold text-accentDeep">
-                {foodResult.confidence}
+                {scanAiResult?.confidence ?? foodResult.confidence}
               </span>
             </div>
             <ul className="space-y-2 text-sm text-muted">
-              {foodResult.why.map((item) => (
+              {(scanAiResult?.followUpPrompts?.length
+                ? scanAiResult.followUpPrompts
+                : foodResult.why
+              ).map((item) => (
                 <li key={item} className="flex gap-2">
                   <ChevronRight className="mt-0.5 h-4 w-4 text-accentDeep" />
                   <span>{item}</span>
@@ -979,6 +1176,26 @@ function ScanScreen({
               ))}
             </ul>
           </div>
+          {scanAiResult && (
+            <div className="rounded-[24px] bg-[#f7fbff] p-4 ring-1 ring-line/80">
+              <p className="text-sm font-semibold text-ink">Nutrition snapshot</p>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-muted">
+                <span>Calories: {scanAiResult.nutrients.calories ?? "n/a"}</span>
+                <span>Protein: {scanAiResult.nutrients.protein ?? "n/a"}</span>
+                <span>Fats: {scanAiResult.nutrients.fats ?? "n/a"}</span>
+                <span>Carbs: {scanAiResult.nutrients.carbs ?? "n/a"}</span>
+              </div>
+              <p className="mt-3 text-xs text-muted">
+                Vitamins:{" "}
+                {scanAiResult.nutrients.vitamins?.join(", ") ?? "Not detected"}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                Minerals:{" "}
+                {scanAiResult.nutrients.minerals?.join(", ") ?? "Not detected"}
+              </p>
+              <p className="mt-3 text-xs text-ink">{scanAiResult.summary}</p>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2">
             {followUpOptions.map((option) => (
               <Chip
@@ -1055,12 +1272,25 @@ function ChatScreen({
   selectedReply,
   outcome,
   onSelectReply,
+  chatInput,
+  setChatInput,
+  onSendMessage,
+  loading,
 }: {
   messages: ChatMessage[];
   selectedReply: string;
   outcome: { summary: string; guidance: string };
   onSelectReply: (reply: string) => void;
+  chatInput: string;
+  setChatInput: (value: string) => void;
+  onSendMessage: (message: string) => Promise<void>;
+  loading: boolean;
 }) {
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void onSendMessage(chatInput);
+  };
+
   return (
     <div className="animate-screenEnter space-y-4 pb-4">
       <Card className="p-4">
@@ -1105,6 +1335,19 @@ function ChatScreen({
       <Card className="space-y-3 bg-waves p-4">
         <p className="text-lg font-semibold text-ink">{outcome.summary}</p>
         <p className="text-sm leading-6 text-muted">{outcome.guidance}</p>
+      </Card>
+      <Card className="p-4">
+        <form onSubmit={onSubmit} className="space-y-3">
+          <textarea
+            value={chatInput}
+            onChange={(event) => setChatInput(event.target.value)}
+            placeholder="Ask PURE AI anything about this food..."
+            className="h-24 w-full rounded-2xl border border-line bg-surface px-3 py-2 text-sm text-ink outline-none ring-accentDeep/30 placeholder:text-muted focus:ring-2"
+          />
+          <Button type="submit" fullWidth disabled={loading || !chatInput.trim()}>
+            {loading ? "PURE AI is thinking..." : "Send to PURE AI"}
+          </Button>
+        </form>
       </Card>
     </div>
   );
