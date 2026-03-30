@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const DEFAULT_MODEL = "pmpt_69ca06e27b848193a5b7bb81cdf8faac023d0663a75aefbe";
+const OPENAI_API_KEY = "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";
 
 type OpenAIResponse = {
   output_text?: string;
