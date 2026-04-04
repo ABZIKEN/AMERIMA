@@ -5,7 +5,7 @@ PURE ai is a mobile-first web application prototype built with Next.js, TypeScri
 ## Features
 
 - Welcome and onboarding flow with support for up to 2 diets and a primary diet selection.
-- Simulated scan experience for food, products, and labels.
+- AI-powered image scan (gallery upload) for food/products with estimated calories, protein, fats, carbs, vitamins, and minerals.
 - Food result and product result cards with diet fit, macros, confidence, and PURE Certified status.
 - Contextual chat flow with quick replies and real AI responses via `POST /api/ai` (OpenAI Responses API).
 - Library and profile sections powered by reusable mock data.
@@ -32,6 +32,8 @@ Create `.env.local` in the project root:
 OPENAI_API_KEY=your_openai_api_key
 # Optional override. Defaults to the bundled prompt model id below.
 OPENAI_MODEL=pmpt_69ca06e27b848193a5b7bb81cdf8faac023d0663a75aefbe
+# Optional model for image scanning (defaults to OPENAI_MODEL, then gpt-4.1-mini)
+OPENAI_SCAN_MODEL=gpt-4.1-mini
 ```
 
 ### Run locally
@@ -58,7 +60,7 @@ npm run start
 
 ## Notes
 
-- This prototype uses mock local state for scanning, profile, and library content.
 - AI chat is wired to a real server route (`app/api/ai/route.ts`) and requires `OPENAI_API_KEY`.
+- AI scan is wired to `app/api/scan/route.ts` and sends uploaded images to OpenAI Responses API using `input_image`.
 - Do not expose API keys in client-side code; keep them only in server environment variables.
 - The UI is intentionally optimized for mobile width while remaining responsive in the browser.
